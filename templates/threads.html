@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% for thread in threads %}
+<div>
+    <article class="media content-section">
+        <div class="media-body">
+            <div class="article-metadata">
+                <a class="mr-2" href="#" style="text-decoration: none;">{{ thread.author }}</a>
+                <small class="text-muted">{{ thread.date_added }}</small>
+            </div>
+            <h2><a class="article-title" href="#" style="text-decoration: none;">{{ thread.title.title() }}</a></h2>
+            <p class="article-content">{{ thread.content }}</p>
+        </div>
+    </article>
+</div>
+{% endfor %}
+
+{% endblock content %}

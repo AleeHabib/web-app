@@ -1,0 +1,17 @@
+{
+    "cSpell.ignoreWords": [
+        "Habib",
+        "Hayat",
+        "Maryam",
+        "aboutpage",
+        "loginpage",
+        "registerpage",
+        "sqlalchemy",
+        "threadspage",
+        "wtforms"
+    ],
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    }
+}
