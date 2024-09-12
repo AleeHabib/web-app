@@ -7,6 +7,7 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(60), nullable=False, unique=False)
     dp = db.Column(db.String(50), nullable=False, unique=False, default="default.jpg")
+    posts = db.relationship("Post", backref="author", lazy=True)
 
     def __repr__(self):
         return f"User({self.username!r}, {self.email!r}, {self.dp!r})"
@@ -17,6 +18,7 @@ class Post(db.Model):
     title = db.Column(db.String(100), nullable=False, unique=False)
     content = db.Column(db.String(1000), nullable=False, unique=False)
     date = db.Column(db.DateTime, nullable=False, unique=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     def __repr__(self):
         return f"Post(title={self.title}, date={self.date})"
