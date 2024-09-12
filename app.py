@@ -1,12 +1,44 @@
 from flask import Flask, render_template, url_for, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from datetime import datetime
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config["SECRET_KEY"] = "d02d98260b25375be94169e74c9751a8"
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+
+class RegistrationForm(FlaskForm):
+
+    username = StringField("Username", validators=[DataRequired(), Length(3, 20)])
+    email = StringField("Email Address", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired(), Length(3, 30)])
+    confirm_password = PasswordField(
+        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Sign Up")
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError("Username already exists")
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError("Account with your email already exists")
+
+
+class LoginForm(FlaskForm):
+    email = StringField("Email Address", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired(), Length(3, 30)])
+    remember = BooleanField("Remember Me!")
+    submit = SubmitField("Login")
 
 
 class User(db.Model):
@@ -18,7 +50,7 @@ class User(db.Model):
     posts = db.relationship("Post", backref="author", lazy=True)
 
     def __repr__(self):
-        return f"User({self.username!r}, {self.email!r}, {self.user_image!r})"
+        return f"User(username={self.username!r}, email={self.email!r}, dp={self.user_image!r})"
 
 
 class Post(db.Model):
@@ -29,7 +61,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     def __repr__(self):
-        return f"Post({self.title!r}, {self.date_posted!r})"
+        return f"Post(title={self.title!r}, date={self.date_posted!r})"
 
 
 # dummy data that will be posted into threadspage
@@ -81,8 +113,14 @@ def aboutpage():
 def registerpage():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f"Account created successfully for {form.username.data}!", "success")
-        return redirect(url_for("threadspage"))
+        hashed_pw = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        user = User(
+            username=form.username.data, email=form.email.data, password=hashed_pw
+        )
+        db.session.add(user)
+        db.session.commit()
+        flash(f"Account created, you can now log in", "success")
+        return redirect(url_for("loginpage"))
     return render_template("register.html", title="Registration", form=form)
 
 
