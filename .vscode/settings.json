@@ -16,6 +16,7 @@
         "**/*.pyc": true
     },
     "cSpell.words": [
+        "accountpage",
         "logoutpage"
     ]
 }

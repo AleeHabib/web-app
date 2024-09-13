@@ -2,7 +2,7 @@ from website import app, db, bcrypt
 from flask import render_template, flash, url_for, redirect
 from website.forms import RegistrationForm, LoginForm
 from website.models import User, Post
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user, login_required
 
 # dummy data that will be posted into threadspage
 threads = [
@@ -80,6 +80,12 @@ def loginpage():
 def logoutpage():
     logout_user()
     return redirect(url_for("homepage"))
+
+
+@app.route("/account")
+@login_required
+def accountpage():
+    return render_template("account.html", title="Account")
 
 
 @app.shell_context_processor
