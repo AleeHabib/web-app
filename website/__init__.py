@@ -13,5 +13,7 @@ bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "loginpage"
+login_manager.login_message_category = "danger"
+login_manager.login_message = "Please login to access this page."
 
 from website import routes

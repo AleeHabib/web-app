@@ -1,5 +1,5 @@
 from website import app, db, bcrypt
-from flask import render_template, flash, url_for, redirect
+from flask import render_template, flash, url_for, redirect, request
 from website.forms import RegistrationForm, LoginForm
 from website.models import User, Post
 from flask_login import login_user, logout_user, current_user, login_required
@@ -25,10 +25,16 @@ threads = [
         "content": "This is the 3rd blog",
     },
     {
-        "author": "xyz 123",
+        "author": "XYZ 123",
         "title": "Blog 4",
         "date_added": "16th August, 2024",
         "content": "This is the 4th blog",
+    },
+    {
+        "author": "ABC 420",
+        "title": "Blog 5",
+        "date_added": "13 September, 2024",
+        "content": "This is the 5th blog",
     },
 ]
 
@@ -70,7 +76,8 @@ def loginpage():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
-            return redirect(url_for("homepage"))
+            next_page = request.args.get("next")
+            return redirect(next_page) if next_page else redirect(url_for("homepage"))
         else:
             flash(f"Login Unsuccessful. Please check email or password", "danger")
     return render_template("login.html", title="Login", form=form)
