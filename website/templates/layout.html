@@ -25,12 +25,16 @@
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
                         <a class="nav-item nav-link" href="{{ url_for('homepage') }}">Home</a>
-                        <a class="nav-item nav-link" href="{{ url_for('threadspage') }}">Threads</a>
                         <a class="nav-item nav-link" href="{{ url_for('aboutpage') }}">About</a>
                     </div>
                     <div class="navbar-nav ml-auto">
+                        {% if current_user.is_authenticated %}
+                        <a class="nav-item nav-link" href="{{ url_for('logoutpage') }}">Log Out</a>
+                        {% else %}
+
                         <a class="nav-item nav-link" href="{{ url_for('loginpage') }}">Login</a>
                         <a class="nav-item nav-link" href="{{ url_for('registerpage') }}">Register</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

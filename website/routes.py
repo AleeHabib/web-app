@@ -2,6 +2,7 @@ from website import app, db, bcrypt
 from flask import render_template, flash, url_for, redirect
 from website.forms import RegistrationForm, LoginForm
 from website.models import User, Post
+from flask_login import login_user, logout_user, current_user
 
 # dummy data that will be posted into threadspage
 threads = [
@@ -35,11 +36,6 @@ threads = [
 @app.route("/")
 @app.route("/home")
 def homepage():
-    return render_template("home.html", title="Home")
-
-
-@app.route("/threads")
-def threadspage():
     return render_template("threads.html", threads=threads, title="Threads")
 
 
@@ -50,6 +46,8 @@ def aboutpage():
 
 @app.route("/register", methods=["GET", "POST"])
 def registerpage():
+    if current_user.is_authenticated:
+        return redirect(url_for("homepage"))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_pw = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
@@ -65,14 +63,23 @@ def registerpage():
 
 @app.route("/login", methods=["GET", "POST"])
 def loginpage():
+    if current_user.is_authenticated:
+        return redirect(url_for("homepage"))
     form = LoginForm()
     if form.validate_on_submit():
-        if form.email.data == "admin@gmail.com" and form.password.data == "password":
-            flash(f"Login Successful", "success")
-            return redirect(url_for("threadspage"))
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            return redirect(url_for("homepage"))
         else:
-            flash(f"Login Unsuccessful, please check email or password", "danger")
+            flash(f"Login Unsuccessful. Please check email or password", "danger")
     return render_template("login.html", title="Login", form=form)
+
+
+@app.route("/logout")
+def logoutpage():
+    logout_user()
+    return redirect(url_for("homepage"))
 
 
 @app.shell_context_processor
